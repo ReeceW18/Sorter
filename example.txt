@@ -1,4 +1,0 @@
-Hello, this is some text content!
-This is line 2.
-This is line 3.
-This line was appended!
