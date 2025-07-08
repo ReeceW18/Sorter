@@ -1,0 +1,14 @@
+/home/reece/Documents/Programming/C#/Sorter/Sorter/bin/Debug/net8.0/Sorter
+/home/reece/Documents/Programming/C#/Sorter/Sorter/bin/Debug/net8.0/Sorter.deps.json
+/home/reece/Documents/Programming/C#/Sorter/Sorter/bin/Debug/net8.0/Sorter.runtimeconfig.json
+/home/reece/Documents/Programming/C#/Sorter/Sorter/bin/Debug/net8.0/Sorter.dll
+/home/reece/Documents/Programming/C#/Sorter/Sorter/bin/Debug/net8.0/Sorter.pdb
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.GeneratedMSBuildEditorConfig.editorconfig
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.AssemblyInfoInputs.cache
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.AssemblyInfo.cs
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.csproj.CoreCompileInputs.cache
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.dll
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/refint/Sorter.dll
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.pdb
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.genruntimeconfig.cache
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/ref/Sorter.dll
