@@ -12,3 +12,4 @@
 /home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.pdb
 /home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.genruntimeconfig.cache
 /home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/ref/Sorter.dll
+/home/reece/Documents/Programming/C#/Sorter/Sorter/obj/Debug/net8.0/Sorter.sourcelink.json
