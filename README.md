@@ -23,10 +23,14 @@ dotnet --version
 git clone https://github.com/ReeceW18/Sorter.git
 
 3. Build
+```
 dotnet build
+```
 
 4. Run
+```
 dotnet run
+```
 
 ## Use
 
