@@ -13,9 +13,10 @@
 *.userosscache
 *.sln.docstates
 notes/
-ProgramFiles/privateLists/*
-ProgramFiles/saves/*
-ProgramFiles/sortedLists/*
+
+ProgramFiles/*/*
+!ProgramFiles/testLists/
+!ProgramFiles/*/.gitkeep
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
