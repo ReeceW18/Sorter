@@ -10,13 +10,32 @@ namespace Sorter
         static void Main(string[] args)
         {
             // variable declarations
-            string baseFolder = "/home/reece/Documents/Programming/C#/Sorter/ProgramFiles"; // 
+            string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string baseFolder = Path.Combine(documentsFolder, "SubjectiveSortingHelper");
 
             // folders
             string testListsFolder = Path.Combine(baseFolder, "testLists");
             string privateListsFolder = Path.Combine(baseFolder, "privateLists");
             string sortedListsFolder = Path.Combine(baseFolder, "sortedLists");
             string savesFolder = Path.Combine(baseFolder, "saves");
+            string[] directories = { testListsFolder, privateListsFolder, sortedListsFolder, savesFolder };
+            foreach (var directory in directories)
+            {
+                Directory.CreateDirectory(directory);
+            }
+            // test lists
+            string[] test1 = {  "81",
+                                "61",
+                                "37",
+                                "86",
+                                "85",
+                                "63",
+                                "96",
+                                "47",
+                                "54",
+                                "99"    };
+            File.WriteAllLines(Path.Combine(testListsFolder, "test1.txt"), test1);
+
 
             // bools
             bool isRunning = true, isSaveFile = false, isSorted = false;
