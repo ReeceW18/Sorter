@@ -1,342 +1,138 @@
-﻿// Sort Helper CLI
+﻿/*
+    Sort Helper CLI
+    Helps user sort a subjective list
+*/
 
-using System.Configuration.Assemblies;
-
-string directory = "/home/reece/Documents/Programming/C#/Sorter/lists"; // directory to store lists
-string[] algortihms = { "Quick Sort", "Merge Sort", "Bubble Sort" }; // sorting algorithms
-
-// display files and ask/read input
-Console.WriteLine("Files:");
-string[] txtFiles = Directory.GetFiles(directory, "*.txt");
-int number = 0;
-foreach (string file in txtFiles)
+namespace Sorter
 {
-    Console.WriteLine($"{number}: " + Path.GetFileName(file));
-    number++;
-}
-Console.Write("Which file do you want to sort? (Enter the number): ");
-int fileIndex;
-while (!int.TryParse(Console.ReadLine(), out fileIndex) || fileIndex < 0 || fileIndex >= txtFiles.Length)
-{
-    Console.WriteLine("Invalid input. Please enter a valid number corresponding to the file you want to sort.");
-}
-
-// display sorting algorithms and ask/read input
-Console.WriteLine("What sorting algorithm would you like to use?");
-number = 0;
-foreach (string algorithm in algortihms)
-{
-    Console.WriteLine($"{number}: " + algorithm);
-    number++;
-}
-Console.Write("Enter a number: ");
-int algorithmIndex;
-while (!int.TryParse(Console.ReadLine(), out algorithmIndex) || algorithmIndex < 0 || algorithmIndex >= algortihms.Length)
-{
-    Console.WriteLine("Invalid input. Please enter a valid number corresponding to the sorting algorithm you want to use.");
-}
-
-Console.WriteLine($"You selected file: {Path.GetFileName(txtFiles[fileIndex])} with algorithm: {algortihms[algorithmIndex]}");
-
-List<string> lines = new List<string>(File.ReadAllLines(txtFiles[fileIndex]));
-
-// sort the lines based on the selected algorithm
-/*if (algorithmIndex == 0) {
-    Sorter.Sort(lines);
-} else if (algorithmIndex == 1) {
-    MergeSorter.Sort(lines);
-} 
-else (algorithmIndex == 2) {
-    BubbleSorter.Sort(lines);
-}*/
-Sorter sorter;
-switch (algorithmIndex) {
-    case 0:
-        sorter = new QuickSorter();
-        break;
-    case 1:
-        sorter = new MergeSorter();
-        break;
-    case 2:
-        sorter = new BubbleSorter();
-        break;
-    default:
-        throw new Exception("invalid algorithm index");
-}
-sorter.Sort(lines);
-
-File.WriteAllLines(directory + "/sorted/" + Path.GetFileName(txtFiles[fileIndex]).Replace(".txt", "_sorted.txt"), lines);
-
-Console.WriteLine("done");
-
-struct ItemComparison
-{
-    public string item1;
-    public string item2;
-
-    public ItemComparison(string one, string two)
+    class Program
     {
-        item1 = one;
-        item2 = two;
-    }
-
-    public bool has(string item)
-    {
-        return item == item1 || item == item2;
-    }
-}
-public class Sorter
-{
-    private List<ItemComparison> items = new List<ItemComparison>();
-
-    protected bool IsGreater(string item1, string item2)
-    {
-        // is item1 greater than item2?
-        foreach (var comp in items)
+        static void Main(string[] args)
         {
-            if (comp.has(item1) && comp.has(item2))
+            // variable declarations
+            string baseFolder = "/home/reece/Documents/Programming/C#/Sorter/ProgramFiles"; // 
+
+            // folders
+            string testListsFolder = Path.Combine(baseFolder, "testLists");
+            string privateListsFolder = Path.Combine(baseFolder, "privateLists");
+            string sortedListsFolder = Path.Combine(baseFolder, "sortedLists");
+            string savesFolder = Path.Combine(baseFolder, "saves");
+
+            // bools
+            bool isRunning = true, isSaveFile = false, isSorted = false;
+
+            // strings
+            string[] files, fileNames;
+            List<string> workingList;
+            string selectedFile, fileName;
+
+            // ints
+            int fileIndex;
+
+            // main loop
+            // better way than having everything nested in while?
+            while (isRunning)
             {
-                if (comp.item1 == item1) return true;
-                else return false;
-            }
-        }
-        Console.WriteLine("1: " + item1);
-        Console.WriteLine("2: " + item2);
-        Console.WriteLine("Which item is greater? (1/2)");
-        int choice;
-        while (!int.TryParse(Console.ReadLine(), out choice) || (choice != 1 && choice != 2))
-        {
-            Console.WriteLine("Invalid input. Please enter 1 or 2.");
-        }
-        if (choice == 1)
-        {
-            StoreComparison(item1, item2);
-        }
-        else
-        {
-            StoreComparison(item2, item1);
-        }
+                // ask whether to load from save or load new file
+                Console.WriteLine("Would you like to load from save (0), or load from file (1)?");
+                isSaveFile = Utils.UserIntInput(0, 1) == 0;
 
-        return !(choice == 1);
-    }
-
-    protected bool IsLess(string item1, string item2)
-    {
-        return !IsGreater(item1, item2);
-    }
-
-    private void StoreComparison(string first, string second)
-    {
-        items.Add(new ItemComparison(first, second));
-        for (int i = 0; i < items.Count; i++)
-        {
-            for (int j = 0; j < items.Count; j++)
-            {
-                bool cont = true;
-                if (j != i && items[j].item1 == items[i].item2)
+                // different behavior depending on whether loading from save or not
+                // could probably be simplified to have less nested behavior
+                if (isSaveFile)
                 {
-                    foreach (var comp in items)
+                    // get user to select save file
+                    files = Directory.GetFiles(savesFolder, "*.txt");
+                    fileIndex = Utils.UserSelectFromList(files);
+                    selectedFile = files[fileIndex];
+                    fileName = Path.GetFileName(selectedFile).Replace(".txt", "");
+
+                    // load save data
+                    (workingList, var savedName, var savedComparisons, var savedPivots) = LoadSaveData(selectedFile);
+                    Sorter sorter = new Sorter(workingList, savedName, savesFolder, savedComparisons, savedPivots);
+
+                    // sort data
+                    isSorted = sorter.UserSort();
+                }
+                else
+                {
+                    // get user to select file to load
+                    files = Directory.GetFiles(privateListsFolder, "*.txt");
+                    files = files.Concat(Directory.GetFiles(testListsFolder, "*.txt")).ToArray();
+                    fileNames = files.Select(s => Path.GetFileName(s).Replace(".txt", "")).ToArray();
+                    fileIndex = Utils.UserSelectFromList(fileNames);
+                    selectedFile = files[fileIndex];
+                    fileName = Path.GetFileName(selectedFile).Replace(".txt", "");
+
+
+                    // load file
+                    workingList = new List<string>(File.ReadAllLines(selectedFile));
+                    Sorter sorter = new Sorter(workingList, Path.GetFileName(selectedFile), savesFolder);
+
+                    // sort
+                    isSorted = sorter.UserSort();
+                }
+
+                // if list was successfully sorted write out to file
+                if (isSorted)
+                {
+                    Console.WriteLine("Sorted list: ");
+                    foreach (var entry in workingList)
                     {
-                        if (comp.has(items[i].item1) && comp.has(items[j].item2)) cont = false;
-                        if (!cont) break;
+                        Console.WriteLine(entry);
                     }
-                    if (!cont) continue;
-                    StoreComparison(items[i].item1, items[j].item2);
+                    Console.WriteLine("Writing to file");
+                    Utils.WriteListToFile(workingList, sortedListsFolder, fileName);
+                    Console.WriteLine("Done, returning to program start");
                 }
             }
+
+
         }
-    }
-    public virtual void Sort(List<string> lines)
-    {
-        int n = lines.Count;
-        for (int i = 0; i < n - 1; i++)
+
+        static (List<string>, string, List<ComparedStrings>, List<int>) LoadSaveData(string filePath)
         {
-            for (int j = 0; j < n - i - 1; j++)
+            // Load sorting information from save file, returns tuple with all data
+            // set up variables
+            List<string> savedList = [];
+            string savedName = "unable to retrive name";
+            List<ComparedStrings> savedComparisons = [];
+            List<int> savedPivots = [];
+
+            // read lines into list
+            string[] lines = File.ReadAllLines(filePath);
+
+            // pull out data into respective variables
+            savedName = lines[0];
+            savedComparisons = ParseComparisons(lines[1]);
+
+            var pivotsAsString = lines[2].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            savedPivots = pivotsAsString.Select(int.Parse).ToList();
+
+            for (int i = 3; i < lines.Length; i++)
             {
-                if (IsGreater(lines[j], lines[j + 1]))
-                {
-                    // swap lines[j] and lines[j + 1]
-                    string temp = lines[j];
-                    lines[j] = lines[j + 1];
-                    lines[j + 1] = temp;
-                }
+                savedList.Add(lines[i]);
             }
+
+            return (savedList, savedName, savedComparisons, savedPivots);
+
         }
-    }
 
-}
-
-public class BubbleSorter : Sorter
-{
-    public override void Sort(List<string> lines)
-    {
-        int n = lines.Count;
-        for (int i = 0; i < n - 1; i++)
+        static List<ComparedStrings> ParseComparisons(string comparisonsAsString)
         {
-            for (int j = 0; j < n - i - 1; j++)
+            // parses comparisons from a string and returns parsed list
+            List<ComparedStrings> savedComparisons = [];
+            string[] comparisonsStringList = comparisonsAsString.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var comparisonAsString in comparisonsStringList)
             {
-                if (IsGreater(lines[j], lines[j + 1]))
-                {
-                    // swap lines[j] and lines[j + 1]
-                    string temp = lines[j];
-                    lines[j] = lines[j + 1];
-                    lines[j + 1] = temp;
-                }
+                string trimmed = comparisonAsString.Trim('(', ')');
+                string[] values = trimmed.Split(',');
+                savedComparisons.Add(new ComparedStrings(values[0], values[1]));
             }
-        }
-    }
-}
-public class MergeSorter : Sorter
-{
-    public override void Sort(List<string> lines)
-    {
-        MergeSort(lines, 0, lines.Count - 1);
-    }
 
-    private void MergeSort(List<string> lines, int left, int right)
-    {
-        if (left < right)
-        {
-            int mid = left + (right - left) / 2;
-
-            MergeSort(lines, left, mid);
-            MergeSort(lines, mid + 1, right);
-
-            Merge(lines, left, mid, right);
-        }
-    }
-
-    private void Merge(List<string> lines, int left, int mid, int right)
-    {
-        int sizeLeft = mid - left + 1;
-        int sizeRight = right - mid;
-
-        List<string> leftList = new List<string>();
-        List<string> rightList = new List<string>();
-
-        for (int i = 0; i < sizeLeft; i++)
-        {
-            leftList.Add(lines[left + i]);
-        }
-        for (int i = 0; i < sizeRight; i++)
-        {
-            rightList.Add(lines[mid + 1 + i]);
+            return savedComparisons;
         }
 
-        int leftIndex = 0, rightIndex = 0;
-        int currIndex = left;
-
-        while (leftIndex < sizeLeft && rightIndex < sizeRight)
-        {
-            if (IsLess(leftList[leftIndex], rightList[rightIndex]))
-            {
-                lines[currIndex] = leftList[leftIndex];
-                leftIndex++;
-            }
-            else
-            {
-                lines[currIndex] = rightList[rightIndex];
-                rightIndex++;
-            }
-            currIndex++;
-        }
-
-        while (leftIndex < sizeLeft)
-        {
-            lines[currIndex] = leftList[leftIndex];
-            leftIndex++;
-            currIndex++;
-        }
-
-        while (rightIndex < sizeRight)
-        {
-            lines[currIndex] = rightList[rightIndex];
-            rightIndex++;
-            currIndex++;
-        }
-    }
-}
-
-class QuickSorter : Sorter
-{
-    public override void Sort(List<string> lines)
-    {
-        quickSort(lines, 0, lines.Count - 1);
-    }
-
-    private void quickSort(List<string> lines, int low, int high)
-    {
-        if (low < high)
-        {
-            int pivotIndex = partition(lines, low, high);
-            quickSort(lines, low, pivotIndex - 1);
-            quickSort(lines, pivotIndex + 1, high);
-        }
-    }
-
-    private int partition(List<string> lines, int low, int high)
-    {
-        int pivotIndex;
-        if (low < lines.Count && high > 0)
-        {
-            pivotIndex = selectPivot(lines, low, high);
-        }
-        else
-        {
-            pivotIndex = high;
-        }
-
-        /*
-        int i = low - 1;
-
-        for (int j = low; j < high; j++)
-        {
-            if (IsLess(pivot, lines[j]))
-            {
-                i = i + 1;
-                string loopTemp = lines[i];
-                lines[i] = lines[j];
-                lines[j] = loopTemp;
-            }
-        }
-
-        string temp = lines[i + 1];
-        lines[i + 1] = lines[high];
-        lines[high] = temp;
-        return i + 1;
-        */
-        string pivot = lines[pivotIndex];
-
-        Swap(lines, pivotIndex, high);
-
-        int storeIndex = low;
-
-        for (int i = low; i < high; i++)
-        {
-            if (IsLess(lines[i], pivot))
-            {
-                Swap(lines, i, storeIndex);
-                storeIndex++;
-            }
-        }
-
-        Swap(lines, storeIndex, high);
-
-        return storeIndex;
-    }
-
-    private int selectPivot(List<string> lines, int low, int high)
-    {
-        // implement user choice of pivot
-        int pivotIndex = high;
-
-        return pivotIndex;
-    }
-
-    private void Swap(List<string> arr, int first, int second)
-    {
-        string temp = arr[first];
-        arr[first] = arr[second];
-        arr[second] = temp;
     }
 }
